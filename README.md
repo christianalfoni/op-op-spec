@@ -41,13 +41,13 @@ This does not make much sense right now, but this is the core building block of 
 const pipe = (...initialOperators) => (err, value, next, final) => {
   if (err) next(err)
   else {
-    const runNextOperator = (operators, err, val) {
-      if (err) next(err)
+    const runNextOperator = (operators, operatorError, operatorValue) {
+      if (operatorError) next(operatorError)
       else if (operators.length) {
         const [nextOperator, ...remainingOperators]  = operators
-        nextOperator(err, val, runNextOperator.bind(null, remainingOperators), final || next) 
+        nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), final || next) 
       }
-      else next(null, val)
+      else next(null, newValue)
     }
     runNextOperator(initialOperators, null, val)
   }
@@ -113,4 +113,40 @@ const search = action(
 )
 ```
 
+Now we are starting to see how effective you can be at expressing complex logic. Exactly how these operators would be implemented depends heavily on where to use them, which is why this is only a spec. Though continue further for more inspiration on creating operators and maybe you find a specific use case where you want to expose a functional API.
+
 ## Example operators
+
+### Async pipe and error handling
+
+This operator transparently handles values that are promises. Meaning that for example **map** could return a promise and it would wait for that promise to resolve before moving on to next operator.
+
+```js
+const pipe = (...initialOperators) => (err, value, next, final) => {
+  if (err) next(err)
+  else {
+    const runNextOperator = (operators, operatorError, operatorValue) {
+      if (operatorError) next(operatorError)
+      else if (operators.length) {
+        const [nextOperator, ...remainingOperators]  = operators
+        const run = (runErr, runValue) =>
+          nextOperator(runErr, runValue, runNextOperator.bind(null, remainingOperators), final || next)
+        
+        if (operatorValue instanceof Promise) {
+          operatorValue
+            .then(promiseValue => run(null, promiseValue))
+            .catch(promiseError => run(promiseError, operatorValue))
+        } else {
+          try {
+            run(null, operatorValue)
+          } catch (operatorError) {
+            run(operatorError, operatorValue)
+          }
+        }
+      }
+      else next(null, val)
+    }
+    runNextOperator(initialOperators, null, val)
+  }
+}
+```
