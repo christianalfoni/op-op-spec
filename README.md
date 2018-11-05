@@ -47,7 +47,7 @@ const pipe = (...initialOperators) => (err, value, next, final) => {
         const [nextOperator, ...remainingOperators]  = operators
         nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), final || next) 
       }
-      else next(null, newValue)
+      else next(null, operatorValue)
     }
     runNextOperator(initialOperators, null, val)
   }
