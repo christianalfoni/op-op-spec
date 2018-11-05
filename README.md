@@ -158,7 +158,7 @@ const debounce = ms => {
 }
 ```
 
-### Async pipe and error handling
+### Pipe (async)
 
 This operator transparently handles values that are promises. Meaning that for example **map** could return a promise or be an async function, and it would wait for it to resolve before moving on to next operator.
 
