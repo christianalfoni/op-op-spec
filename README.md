@@ -119,7 +119,7 @@ Now we are starting to see how effective you can be at expressing complex logic.
 
 ### Async pipe and error handling
 
-This operator transparently handles values that are promises. Meaning that for example **map** could return a promise and it would wait for that promise to resolve before moving on to next operator.
+This operator transparently handles values that are promises. Meaning that for example **map** could return a promise or be an async function, and it would wait for it to resolve before moving on to next operator.
 
 ```js
 const pipe = (...initialOperators) => (err, value, next, final) => {
