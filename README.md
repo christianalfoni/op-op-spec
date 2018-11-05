@@ -166,13 +166,13 @@ This operator transparently handles values that are promises. Meaning that for e
 const pipe = (...initialOperators) => (err, value, next, final) => {
   if (err) next(err)
   else {
-    const runNextOperator = (operators, operatorError, operatorValue) {
+    const runNextOperator = (operators, operatorError, operatorValue) => {
       if (operatorError) next(operatorError)
       else if (operators.length) {
-        const [nextOperator, ...remainingOperators]  = operators
+        const [nextOperator, ...remainingOperators] = operators
         const run = (runErr, runValue) =>
           nextOperator(runErr, runValue, runNextOperator.bind(null, remainingOperators), final || next)
-        
+
         if (operatorValue instanceof Promise) {
           operatorValue
             .then(promiseValue => run(null, promiseValue))
@@ -185,9 +185,9 @@ const pipe = (...initialOperators) => (err, value, next, final) => {
           }
         }
       }
-      else next(null, val)
+      else next(null, operatorValue)
     }
-    runNextOperator(initialOperators, null, val)
+    runNextOperator(initialOperators, null, value)
   }
 }
 ```
