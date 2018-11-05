@@ -117,6 +117,47 @@ Now we are starting to see how effective you can be at expressing complex logic.
 
 ## Example operators
 
+### Wait
+
+```js
+const wait = ms => (err, value, next) => {
+  if (err) next(err)
+  else setTimeout(() => next(null, value), ms)
+}
+```
+
+### Filter
+```js
+const filter = operation => (err, value, next, final) => {
+  if (err) next(err)
+  else if (operation(value)) next(null, value)
+  else final(null, value)
+}
+```
+
+### Debounce
+
+```js
+const debounce = ms => {
+  let timeout
+  let previousFinal
+  return (err, value, next, final) => {
+    if (err) {
+      return next(err)
+    }
+    if (timeout) {
+      clearTimeout(timeout)
+      previousFinal(null, value)
+    }
+    previousFinal = final
+    timeout = setTimeout(() => {
+      timeout = null
+      next(null, value)
+    }, ms)
+  }
+}
+```
+
 ### Async pipe and error handling
 
 This operator transparently handles values that are promises. Meaning that for example **map** could return a promise or be an async function, and it would wait for it to resolve before moving on to next operator.
