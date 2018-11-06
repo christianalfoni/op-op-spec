@@ -169,7 +169,7 @@ Now we are starting to see how effective you can be at expressing complex logic.
 function map (operation) {
   return (err, value, next) => {
     if (err) next(err)
-    else next(null, value)
+    else next(null, operation(value))
   }
 }
 ```
