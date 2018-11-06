@@ -56,22 +56,22 @@ const pipe = (...initialOperators) => (err, value, next, final = next) => {
 }
 ```
 
-With this operator we are now able to run multiple **doThis**:
+With this operator we are now able to run multiple operators:
 
 ```js
-const manyDoThis = pipe(
-  doThis, // null, "foo"
-  doThis, // null, "foo"
-  doThis // null, "foo"
+const operators = pipe(
+  operator, // null, "foo"
+  operator, // null, "foo"
+  operator // null, "foo"
 )
 
-manyDoThis(null, "foo", console.log) // null, "foo"
+operators(null, "foo", console.log) // null, "foo"
 ```
 
-But we are still not really doing anything interesting. Let us introduce our first userful operator, **map**:
+But we are still not really doing anything interesting. Let us introduce our first useful operator, **map**:
 
 ```js
-const map = operation => (err, value, next) => {
+const map = operation => (err, value, next, final = next) => {
   if (err) next(err)
   else next(null, operation(value))
 }
@@ -80,12 +80,12 @@ const map = operation => (err, value, next) => {
 Now we can do this:
 
 ```js
-const doThis = pipe(
+const operator = pipe(
   map(value => value.toUpperCase()),
   map(value => value + "!!!")
 )
 
-doThis(null, "hello world", console.log) // null, "HELLO WORLD!!!"
+operator(null, "hello world", console.log) // null, "HELLO WORLD!!!"
 ```
 
 Or let us be super declarative here:
@@ -94,12 +94,12 @@ Or let us be super declarative here:
 const toUpperCase = map(value => value.toUpperCase())
 const shout = map(value => value + "!!!")
 
-const doThis = pipe(
+const operator = pipe(
   toUpperCase,
   shout
 )
 
-doThis(null, "hello world", console.log) // null, "HELLO WORLD!!!"
+operator(null, "hello world", console.log) // null, "HELLO WORLD!!!"
 ```
 
 Again, not extremly helpful, so let us imagine:
