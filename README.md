@@ -12,7 +12,7 @@ function operator (err, value, next, final = next) {}
 
 **The type signature**
 ```ts
-type Operator<Input, Output = Input> = (
+type Operator<Input, Output> = (
   err: Error,
   value: Input,
   next: (err: Error, value: Output),
@@ -214,7 +214,7 @@ function wait (ms) {
 ```
 
 ```ts
-function wait <Input>(ms: number): Operator<Input> {
+function wait <Input>(ms: number): Operator<Input, Input> {
   ...
 }
 ```
@@ -233,7 +233,7 @@ function filter (operation) {
 ```ts
 function filter <Input>(
   operation: (value: Input) => boolean
-): Operator<Input> {
+): Operator<Input, Input> {
   ...
 }
 ```
@@ -262,7 +262,7 @@ function debounce (ms) {
 ```
 
 ```ts
-function debounce <Input>(ms: number): Operator<Input> {
+function debounce <Input>(ms: number): Operator<Input, Input> {
   ...
 }
 ```
