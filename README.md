@@ -125,7 +125,7 @@ const makeUpperCaseAndShout = func(
 makeUpperCaseAndShout("hello world")
 ```
 
-Maybe we want to know when it is done execution, using a promise:
+Maybe we want to know when it is done executing, using a promise:
 
 ```js
 const promise = (...operators) => {
