@@ -22,10 +22,10 @@ type Operator<Input, Output = Input> = (
 
 ## Understand how it works
 
-The simplest implementation of op-op is just to create a function:
+The simplest implementation of op-op is to create a function with the signature:
 
 ```js
-const doThis = (err, value, next) => {
+const doThis = (err, value, next, final = next) => {
   if (err) next(err)
   else next(null, value)
 }
