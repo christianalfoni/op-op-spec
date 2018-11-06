@@ -130,7 +130,7 @@ const wait = ms => (err, value, next) => {
 
 ### Filter
 ```js
-const filter = operation => (err, value, next, final) => {
+const filter = operation => (err, value, next, final = next) => {
   if (err) next(err)
   else if (operation(value)) next(null, value)
   else final(null, value)
