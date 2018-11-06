@@ -37,17 +37,17 @@ Which you could call like this:
 doThis(null, "foo", console.log) // null, "foo"
 ```
 
-This does not make much sense right now, but this is the core building block of **op-op**. Let us use this signature to create a more powerful abstraction. Let us name it **pipe**:
+This function is now an **operator** and it is the core building block of op-op. Let us use this signature to create a more powerful abstraction. Let us name it **pipe**:
 
 ```js
-const pipe = (...initialOperators) => (err, value, next, final) => {
+const pipe = (...initialOperators) => (err, value, next, final = next) => {
   if (err) next(err)
   else {
     const runNextOperator = (operators, operatorError, operatorValue) {
       if (operatorError) next(operatorError)
       else if (operators.length) {
         const [nextOperator, ...remainingOperators]  = operators
-        nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), final || next) 
+        nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), final) 
       }
       else next(null, operatorValue)
     }
