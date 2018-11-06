@@ -7,7 +7,7 @@ Op-op is just a signature that allows infinite async composition of logic with e
 
 **The signature**
 ```js
-(err, value, next, final = next) => {}
+function operator (err, value, next, final = next) {}
 ```
 
 **The type signature**
@@ -25,7 +25,7 @@ type Operator<Input, Output = Input> = (
 The simplest implementation of op-op is to create a function with the signature:
 
 ```js
-const operator = (err, value, next, final = next) => {
+function operator (err, value, next, final = next) {
   if (err) next(err)
   else next(null, value)
 }
@@ -40,18 +40,20 @@ operator(null, "foo", console.log) // null, "foo"
 This function is now an **operator** and it is the core building block of op-op. Let us use this signature to create a more powerful abstraction. Let us name it **pipe**:
 
 ```js
-const pipe = (...initialOperators) => (err, value, next, final = next) => {
-  if (err) next(err)
-  else {
-    const runNextOperator = (operators, operatorError, operatorValue) {
-      if (operatorError) next(operatorError)
-      else if (operators.length) {
-        const [nextOperator, ...remainingOperators]  = operators
-        nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), final) 
+function pipe (...initialOperators) {
+  return (err, value, next, final = next) => {
+    if (err) next(err)
+    else {
+      const runNextOperator = (operators, operatorError, operatorValue) {
+        if (operatorError) next(operatorError)
+        else if (operators.length) {
+          const [nextOperator, ...remainingOperators]  = operators
+          nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), final) 
+        }
+        else next(null, operatorValue)
       }
-      else next(null, operatorValue)
+      runNextOperator(initialOperators, null, val)
     }
-    runNextOperator(initialOperators, null, val)
   }
 }
 ```
@@ -71,9 +73,11 @@ operators(null, "foo", console.log) // null, "foo"
 But we are still not really doing anything interesting. Let us introduce our first useful operator, **map**:
 
 ```js
-const map = operation => (err, value, next, final = next) => {
-  if (err) next(err)
-  else next(null, operation(value))
+function map (operation) {
+  return (err, value, next, final = next) => {
+    if (err) next(err)
+    else next(null, operation(value))
+  }
 }
 ```
 
@@ -119,28 +123,63 @@ Now we are starting to see how effective you can be at expressing complex logic.
 
 ## Example operators
 
+### Map
+
+```js
+const map = operation => (err, value, next) => {
+  if (err) next(err)
+  else next(null, value)
+}
+```
+
+```ts
+function map <Input, Output>(
+  operation: (value: Input) => Output
+): Operator<Input, Output> {
+  ...
+}
+```
+
 ### Wait
 
 ```js
-const wait = ms => (err, value, next) => {
-  if (err) next(err)
-  else setTimeout(() => next(null, value), ms)
+function wait (ms) {
+  return (err, value, next) => {
+    if (err) next(err)
+    else setTimeout(() => next(null, value), ms)
+  }
+}
+```
+
+```ts
+function wait <Input>(ms: number): Operator<Input> {
+  ...
 }
 ```
 
 ### Filter
 ```js
-const filter = operation => (err, value, next, final = next) => {
-  if (err) next(err)
-  else if (operation(value)) next(null, value)
-  else final(null, value)
+function filter (operation) {
+  return (err, value, next, final = next) => {
+    if (err) next(err)
+    else if (operation(value)) next(null, value)
+    else final(null, value)
+  }
+}
+```
+
+```ts
+function filter <Input>(
+  operation: (value: Input) => boolean
+): Operator<Input> {
+  ...
 }
 ```
 
 ### Debounce
 
 ```js
-const debounce = ms => {
+function debounce (ms) {
   let timeout
   let previousFinal
   return (err, value, next, final) => {
@@ -160,36 +199,62 @@ const debounce = ms => {
 }
 ```
 
+```ts
+function debounce <Input>(ms: number): Operator<Input> {
+  ...
+}
+```
+
 ### Pipe (async)
 
 This operator transparently handles values that are promises. Meaning that for example **map** could return a promise or be an async function, and it would wait for it to resolve before moving on to next operator.
 
 ```js
-const pipe = (...initialOperators) => (err, value, next, final) => {
-  if (err) next(err)
-  else {
-    const runNextOperator = (operators, operatorError, operatorValue) => {
-      if (operatorError) next(operatorError)
-      else if (operators.length) {
-        const [nextOperator, ...remainingOperators] = operators
-        const run = (runErr, runValue) =>
-          nextOperator(runErr, runValue, runNextOperator.bind(null, remainingOperators), final || next)
+function pipe (...operators) {
+  return (err, value, next, final = next) {
+    if (err) next(err)
+    else {
+      let operatorIndex = 0
+      const run = (runErr, runValue) =>
+        operators[operatorIndex++](runErr, runValue, runNextOperator, final)
+
+      const runNextOperator = (operatorError, operatorValue) => {
+        if (operatorError) return next(operatorError)
+        if (operatorIndex >= operators.length)
+          return next(null, operatorValue)
 
         if (operatorValue instanceof Promise) {
           operatorValue
-            .then(promiseValue => run(null, promiseValue))
-            .catch(promiseError => run(promiseError, operatorValue))
+            .then((promiseValue) => run(null, promiseValue))
+            .catch((promiseError) => next(promiseError, operatorValue))
         } else {
           try {
             run(null, operatorValue)
           } catch (operatorError) {
-            run(operatorError, operatorValue)
+            next(operatorError, operatorValue)
           }
         }
       }
-      else next(null, operatorValue)
+
+      runNextOperator(null, value)
     }
-    runNextOperator(initialOperators, null, value)
   }
+}
+```
+
+```ts
+function pipe<A, B>(aOperator: Operator<A, B>): Operator<A, B>
+function pipe<A, B, C>(
+  aOperator: Operator<A, B>,
+  bOperator: Operator<B, C>
+): Operator<A, C>
+function pipe<A, B, C, D>(
+  aOperator: Operator<A, B>,
+  bOperator: Operator<B, C>,
+  cOperator: Operator<C, D>
+): Operator<A, D>
+// Continue this pattern to support as many operators you need
+function pipe (...operators) {
+  ...
 }
 ```
