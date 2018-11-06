@@ -52,7 +52,7 @@ function pipe (...initialOperators) {
         }
         else next(null, operatorValue)
       }
-      runNextOperator(initialOperators, null, val)
+      runNextOperator(initialOperators, null, value)
     }
   }
 }
