@@ -25,7 +25,7 @@ type Operator<Input, Output = Input> = (
 The simplest implementation of op-op is to create a function with the signature:
 
 ```js
-const doThis = (err, value, next, final = next) => {
+const operator = (err, value, next, final = next) => {
   if (err) next(err)
   else next(null, value)
 }
@@ -34,7 +34,7 @@ const doThis = (err, value, next, final = next) => {
 Which you could call like this:
 
 ```js
-doThis(null, "foo", console.log) // null, "foo"
+operator(null, "foo", console.log) // null, "foo"
 ```
 
 This function is now an **operator** and it is the core building block of op-op. Let us use this signature to create a more powerful abstraction. Let us name it **pipe**:
