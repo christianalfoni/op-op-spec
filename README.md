@@ -109,14 +109,14 @@ operator(null, "hello world", console.log) // null, "HELLO WORLD!!!"
 We would like to make this operator callable, like a plain function passing a value:
 
 ```js
-const func = (...operators) => {
+const toFunc = (...operators) => {
   const run = pipe(...operators)
   return value => run(null, value, () => {})
 }
 
 
 
-const makeUpperCaseAndShout = func(
+const makeUpperCaseAndShout = toFunc(
   toUpperCase,
   shout,
   console.log
@@ -128,7 +128,7 @@ makeUpperCaseAndShout("hello world")
 Maybe we want to know when it is done executing, using a promise:
 
 ```js
-const promise = (...operators) => {
+const toPromise = (...operators) => {
   const run = pipe(...operators)
   return value => new Promise((resolve, reject) => 
     run(null, value, (err, value) => {
@@ -138,7 +138,7 @@ const promise = (...operators) => {
    )
 }
 
-const makeUpperCaseAndShout = promise(
+const makeUpperCaseAndShout = toPromise(
   toUpperCase,
   shout
 )
