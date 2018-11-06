@@ -1,6 +1,8 @@
 # op-op-spec
 The op-op specification. A simple straight forward approach to functional programming
 
+## What is it?
+
 Op-op is just a signature that allows infinite async composition of logic with error handling.
 
 **The signature**
