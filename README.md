@@ -16,7 +16,7 @@ type Operator<Input, Output> = (
   err: Error,
   value: Input,
   next: (err: Error, value?: Output) => void,
-  final: (err: Error, value?: Output) => void
+  final?: (err: Error, value?: Output) => void
 ) => void
 ```
 
