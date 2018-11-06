@@ -106,7 +106,47 @@ const operator = pipe(
 operator(null, "hello world", console.log) // null, "HELLO WORLD!!!"
 ```
 
-Again, not extremly helpful, so let us imagine:
+We would like to make this operator callable, like a plain function passing a value:
+
+```js
+const func = (...operators) => {
+  const run = pipe(...operators)
+  return value => run(null, value, () => {})
+}
+
+
+
+const makeUpperCaseAndShout = func(
+  toUpperCase,
+  shout,
+  console.log
+)
+
+doThis("hello world")
+```
+
+Maybe we want to know when it is done execution, using a promise:
+
+```js
+const promise = (...operators) => {
+  const run = pipe(...operators)
+  return value => new Promise((resolve, reject) => 
+    run(null, value, (err, value) => {
+      if (err) reject(err)
+      else resolve(value)
+    })
+   )
+}
+
+const makeUpperCaseAndShout = promise(
+  toUpperCase,
+  shout
+)
+
+doThis("hello world").then(console.log)
+```
+
+Again, not extremly helpful, but hopefully you see the potential. Let us imagine:
 
 ```js
 const search = action(
