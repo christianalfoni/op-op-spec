@@ -1,5 +1,5 @@
 # op-op-spec
-The op-op specification. A simple straight forward approach to functional programming
+The op-op specification. A simple straight forward approach to functional programming with type support
 
 ## What is it?
 
