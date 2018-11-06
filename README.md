@@ -15,8 +15,8 @@ function operator (err, value, next, final = next) {}
 type Operator<Input, Output> = (
   err: Error,
   value: Input,
-  next: (err: Error, value: Output),
-  final: (err: Error, value: Output)
+  next: (err: Error, value: Output) => void,
+  final: (err: Error, value: Output) => void
 ) => void
 ```
 
