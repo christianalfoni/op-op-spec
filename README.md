@@ -273,7 +273,7 @@ This operator transparently handles values that are promises. Meaning that for e
 
 ```js
 function pipe (...operators) {
-  return (err, value, next, final = next) {
+  return (err, value, next, final = next) => {
     if (err) next(err)
     else {
       let operatorIndex = 0
