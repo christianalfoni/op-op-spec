@@ -122,7 +122,7 @@ const makeUpperCaseAndShout = func(
   console.log
 )
 
-doThis("hello world")
+makeUpperCaseAndShout("hello world")
 ```
 
 Maybe we want to know when it is done execution, using a promise:
@@ -143,7 +143,7 @@ const makeUpperCaseAndShout = promise(
   shout
 )
 
-doThis("hello world").then(console.log)
+makeUpperCaseAndShout("hello world").then(console.log)
 ```
 
 Again, not extremly helpful, but hopefully you see the potential. Let us imagine:
