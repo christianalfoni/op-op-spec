@@ -126,9 +126,11 @@ Now we are starting to see how effective you can be at expressing complex logic.
 ### Map
 
 ```js
-const map = operation => (err, value, next) => {
-  if (err) next(err)
-  else next(null, value)
+function map (operation) {
+  return (err, value, next) => {
+    if (err) next(err)
+    else next(null, value)
+  }
 }
 ```
 
@@ -139,6 +141,26 @@ function map <Input, Output>(
   ...
 }
 ```
+
+### CatchError
+
+```js
+function catchError (operation) {
+  return (err, value, next) => {
+    if (err) next(null, operation(err))
+    else next(null, value)
+  }
+}
+```
+
+```ts
+function catchError <Input, Output>(
+  operation: (value: Error) => Output
+): Operator<Input, Output> {
+  ...
+}
+```
+
 
 ### Wait
 
