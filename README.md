@@ -305,7 +305,9 @@ function pipe (...operators) {
 ```
 
 ```ts
-function pipe<A, B>(aOperator: Operator<A, B>): Operator<A, B>
+function pipe<A, B>(
+  aOperator: Operator<A, B>
+): Operator<A, B>
 function pipe<A, B, C>(
   aOperator: Operator<A, B>,
   bOperator: Operator<B, C>
