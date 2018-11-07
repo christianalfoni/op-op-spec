@@ -305,18 +305,18 @@ function pipe (...operators) {
 ```
 
 ```ts
-function pipe<A, B>(
-  aOperator: Operator<A, B>
-): Operator<A, B>
 function pipe<A, B, C>(
-  aOperator: Operator<A, B>,
-  bOperator: Operator<B, C>
+  aOperator: Operator<A, B>
 ): Operator<A, C>
 function pipe<A, B, C, D>(
   aOperator: Operator<A, B>,
+  bOperator: Operator<B, C>
+): Operator<A, D>
+function pipe<A, B, C, D, E>(
+  aOperator: Operator<A, B>,
   bOperator: Operator<B, C>,
   cOperator: Operator<C, D>
-): Operator<A, D>
+): Operator<A, E>
 // Continue this pattern to support as many operators you need
 function pipe (...operators) {
   ...
