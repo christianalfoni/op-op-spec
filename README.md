@@ -7,7 +7,7 @@ Op-op is just a signature that allows infinite async composition of logic with e
 
 **The signature**
 ```js
-function operator (err, value, next, final = next) {}
+function operator (err, value, next, complete = next) {}
 ```
 
 **The type signature**
@@ -16,7 +16,7 @@ type Operator<Input, Output> = (
   err: Error,
   value: Input,
   next: (err: Error, value?: Output) => void,
-  final?: (err: Error, value?: Output) => void
+  complete?: (err: Error, value?: Output) => void
 ) => void
 ```
 
@@ -25,7 +25,7 @@ type Operator<Input, Output> = (
 The simplest implementation of op-op is to create a function with the signature:
 
 ```js
-function operator (err, value, next, final = next) {
+function operator (err, value, next, complete = next) {
   if (err) next(err)
   else next(null, value)
 }
@@ -41,14 +41,14 @@ This function is now an **operator** and it is the core building block of op-op.
 
 ```js
 function pipe (...initialOperators) {
-  return (err, value, next, final = next) => {
+  return (err, value, next, complete = next) => {
     if (err) next(err)
     else {
       const runNextOperator = (operators, operatorError, operatorValue) {
         if (operatorError) next(operatorError)
         else if (operators.length) {
           const [nextOperator, ...remainingOperators]  = operators
-          nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), final) 
+          nextOperator(null, operatorValue, runNextOperator.bind(null, remainingOperators), complete) 
         }
         else next(null, operatorValue)
       }
@@ -74,7 +74,7 @@ But we are still not really doing anything interesting. Let us introduce our fir
 
 ```js
 function map (operation) {
-  return (err, value, next, final = next) => {
+  return (err, value, next, complete = next) => {
     if (err) next(err)
     else next(null, operation(value))
   }
@@ -222,10 +222,10 @@ function wait <Input>(ms: number): Operator<Input, Input> {
 ### Filter
 ```js
 function filter (operation) {
-  return (err, value, next, final = next) => {
+  return (err, value, next, complete = next) => {
     if (err) next(err)
     else if (operation(value)) next(null, value)
-    else final(null, value)
+    else complete(null, value)
   }
 }
 ```
@@ -243,16 +243,16 @@ function filter <Input>(
 ```js
 function debounce (ms) {
   let timeout
-  let previousFinal
-  return (err, value, next, final) => {
+  let previousComplete
+  return (err, value, next, complete) => {
     if (err) {
       return next(err)
     }
     if (timeout) {
       clearTimeout(timeout)
-      previousFinal(null, value)
+      previousComplete(null, value)
     }
-    previousFinal = final
+    previousComplete = complete
     timeout = setTimeout(() => {
       timeout = null
       next(null, value)
@@ -273,12 +273,12 @@ This operator transparently handles values that are promises. Meaning that for e
 
 ```js
 function pipe (...operators) {
-  return (err, value, next, final = next) => {
+  return (err, value, next, complete = next) => {
     if (err) next(err)
     else {
       let operatorIndex = 0
       const run = (runErr, runValue) =>
-        operators[operatorIndex++](runErr, runValue, runNextOperator, final)
+        operators[operatorIndex++](runErr, runValue, runNextOperator, complete)
 
       const runNextOperator = (operatorError, operatorValue) => {
         if (operatorError) return next(operatorError)
